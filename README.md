@@ -3,6 +3,6 @@
 Shell           ██████████████████████░░  91.51 %
 JavaScript      ██░░░░░░░░░░░░░░░░░░░░░░  8.49 %
 
-Quasar
+Vector
 ```
 <!-- LANG-SECTION:END -->
