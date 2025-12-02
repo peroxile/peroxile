@@ -23,6 +23,11 @@ function pickWord() {
   return WORDS[b % WORDS.length];
 }
 
+// ANSI COLOR
+const BLUE = "\u001b[34m";
+const GREEN = "\u001b[32m";
+const RESET = "\u001b[0m";
+
 // GITHUB API
 
 function api(path) {
@@ -67,18 +72,20 @@ let used = rows.reduce((a, [, v]) => a + v, 0);
 if (total - used > 0) rows.push(["Others", total - used]);
 
 const word = pickWord();
+const coloredWord = `${BLUE}RanDom:${GREEN} ${word}${RESET}`;
 
 const lines = rows.map(([k, v]) => {
   const p = (v / total) * 100;
   const fill = Math.round(BAR * p / 100);
   return `${k.padEnd(15)} ${"█".repeat(fill)}${"░".repeat(BAR - fill)}  ${p.toFixed(2)} %`;
-}).join("\n") + `\n\n${word}`;
+}).join("\n") + `\n\n${coloredWord}`;
 
 // INJECT INTO README 
 
 const block =
 `<!-- LANG-SECTION:START -->
 \`\`\`text
+Most Used Languages:
 ${lines}
 \`\`\`
 <!-- LANG-SECTION:END -->`;
