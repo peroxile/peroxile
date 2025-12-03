@@ -23,10 +23,6 @@ function pickWord() {
   return WORDS[b % WORDS.length];
 }
 
-// ANSI COLOR
-const BLUE = "\u001b[34m";
-const GREEN = "\u001b[32m";
-const RESET = "\u001b[0m";
 
 // GITHUB API
 
@@ -63,6 +59,7 @@ for (const r of repos) {
 // COMPUTE
 
 const total = Object.values(sizeByLang).reduce((a, b) => a + b, 0);
+if (!total) process.exit(0);
 
 const rows = Object.entries(sizeByLang)
   .sort((a, b) => b[1] - a[1])
@@ -72,22 +69,24 @@ let used = rows.reduce((a, [, v]) => a + v, 0);
 if (total - used > 0) rows.push(["Others", total - used]);
 
 const word = pickWord();
-const coloredWord = `${BLUE}RanDom:${GREEN} ${word}${RESET}`;
+const coloredWord = `<span style="color:#4aa3ff">Random:</span> <span style="color:#4CAF50">${word}</span>`;
 
 const lines = rows.map(([k, v]) => {
   const p = (v / total) * 100;
   const fill = Math.round(BAR * p / 100);
   return `${k.padEnd(15)} ${"█".repeat(fill)}${"░".repeat(BAR - fill)}  ${p.toFixed(2)} %`;
-}).join("\n") + `\n\n${coloredWord}`;
+}).join("\n");
 
 // INJECT INTO README 
 
 const block =
 `<!-- LANG-SECTION:START -->
-\`\`\`text
-Most Used Languages:
+  <div>
+    <strong>Most Used Languages: </strong><br><pre>
 ${lines}
-\`\`\`
+</pre>
+${coloredWord}
+  </div>
 <!-- LANG-SECTION:END -->`;
 
 let readme = fs.readFileSync("README.md", "utf8");
@@ -99,3 +98,4 @@ if (!readme.includes("LANG-SECTION:START")) {
 }
 
 fs.writeFileSync("README.md", readme);
+
