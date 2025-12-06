@@ -5,6 +5,6 @@ Shell           ███████████████░░░░░░�
 JavaScript      ████████░░░░░░░░░░░░░░░░  31.27 %
 HTML            █░░░░░░░░░░░░░░░░░░░░░░░  4.92 %
 </pre>
-<span style="color:#4aa3ff">Random:</span> <span style="color:#4CAF50">Nexus</span>
+<span style="color:#4aa3ff">Random:</span> <span style="color:#4CAF50">Entropy</span>
   </div>
 <!-- LANG-SECTION:END -->
