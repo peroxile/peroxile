@@ -15,7 +15,7 @@ const WORDS = [
   "Kernel",
   "Quasar",
   "Entropy",
-  "Vector"
+  "Vector",
 ];
 
 function pickWord() {
@@ -23,22 +23,37 @@ function pickWord() {
   return WORDS[b % WORDS.length];
 }
 
+// SVG GENERATOR
+function makeSVG(name) {
+  return `
+<svg width="200" height="20" xmlns="http://www.w3.org/2000/svg">
+  <text x="0" y="15" fill="#4aa3ff" font-size="14">Random:</text>
+  <text x="70" y="15" fill="#4CAF50" font-size="14">${name}</text>
+</svg>
+`.trim();
+}
 
 // GITHUB API
 
 function api(path) {
   return new Promise((res, rej) => {
-    https.get(`https://api.github.com${path}`, {
-      headers: {
-        "User-Agent": "readme-bot",
-        "Authorization": `token ${process.env.GITHUB_TOKEN}`,
-        "Accept": "application/vnd.github+json"
-      }
-    }, r => {
-      let d = "";
-      r.on("data", c => d += c);
-      r.on("end", () => res(JSON.parse(d)));
-    }).on("error", rej);
+    https
+      .get(
+        `https://api.github.com${path}`,
+        {
+          headers: {
+            "User-Agent": "readme-bot",
+            Authorization: `token ${process.env.GITHUB_TOKEN}`,
+            Accept: "application/vnd.github+json",
+          },
+        },
+        (r) => {
+          let d = "";
+          r.on("data", (c) => (d += c));
+          r.on("end", () => res(JSON.parse(d)));
+        }
+      )
+      .on("error", rej);
   });
 }
 
@@ -55,7 +70,7 @@ for (const r of repos) {
     sizeByLang[k] = (sizeByLang[k] || 0) + v;
   }
 }
-
+git 
 // COMPUTE
 
 const total = Object.values(sizeByLang).reduce((a, b) => a + b, 0);
@@ -68,25 +83,27 @@ const rows = Object.entries(sizeByLang)
 let used = rows.reduce((a, [, v]) => a + v, 0);
 if (total - used > 0) rows.push(["Others", total - used]);
 
-const word = pickWord();
-const coloredWord = `<span style="color:#4aa3ff">Random:</span> <span style="color:#4CAF50">${word}</span>`;
+const lines = rows
+  .map(([k, v]) => {
+    const p = (v / total) * 100;
+    const fill = Math.round((BAR * p) / 100);
+    return `${k.padEnd(15)} ${"█".repeat(fill)}${"░".repeat(
+      BAR - fill
+    )}  ${p.toFixed(2)} %`;
+  })
+  .join("\n");
 
-const lines = rows.map(([k, v]) => {
-  const p = (v / total) * 100;
-  const fill = Math.round(BAR * p / 100);
-  return `${k.padEnd(15)} ${"█".repeat(fill)}${"░".repeat(BAR - fill)}  ${p.toFixed(2)} %`;
-}).join("\n");
+const svg = makeSVG(pickWord());
 
-// INJECT INTO README 
+// INJECT INTO README
 
-const block =
-`<!-- LANG-SECTION:START -->
-  <div>
-    <strong>Most Used Languages: </strong><br><pre>
+const block = `<!-- LANG-SECTION:START -->
+\`\`\`text
+  Most Used Languages:
 ${lines}
-</pre>
-${coloredWord}
-  </div>
+\`\`\`
+
+${svg}
 <!-- LANG-SECTION:END -->`;
 
 let readme = fs.readFileSync("README.md", "utf8");
@@ -94,8 +111,10 @@ let readme = fs.readFileSync("README.md", "utf8");
 if (!readme.includes("LANG-SECTION:START")) {
   readme += "\n\n" + block;
 } else {
-  readme = readme.replace(/<!-- LANG-SECTION:START -->[\s\S]*?<!-- LANG-SECTION:END -->/, block);
+  readme = readme.replace(
+    /<!-- LANG-SECTION:START -->[\s\S]*?<!-- LANG-SECTION:END -->/,
+    block
+  );
 }
 
 fs.writeFileSync("README.md", readme);
-
