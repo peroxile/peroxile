@@ -70,7 +70,7 @@ for (const r of repos) {
     sizeByLang[k] = (sizeByLang[k] || 0) + v;
   }
 }
-git 
+
 // COMPUTE
 
 const total = Object.values(sizeByLang).reduce((a, b) => a + b, 0);
