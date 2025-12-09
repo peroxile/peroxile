@@ -99,7 +99,8 @@ const svg = makeSVG(pickWord());
 
 const block = `<!-- LANG-SECTION:START -->
 \`\`\`text
-  Most Used Languages:
+Most Used Languages:
+
 ${lines}
 \`\`\`
 
