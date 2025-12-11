@@ -94,16 +94,18 @@ const lines = rows
   .join("\n");
 
 const svg = makeSVG(pickWord());
+fs.writeFileSync("stats.svg", svgText, "utf8");
 
 // INJECT INTO README
 
 const block = `<!-- LANG-SECTION:START -->
 \`\`\`text
-  Most Used Languages:
+Most Used Languages:
+
 ${lines}
 \`\`\`
 
-${svg}
+<img src="./stats.svg">
 <!-- LANG-SECTION:END -->`;
 
 let readme = fs.readFileSync("README.md", "utf8");
@@ -117,4 +119,4 @@ if (!readme.includes("LANG-SECTION:START")) {
   );
 }
 
-fs.writeFileSync("README.md", readme);
+fs.writeFileSync("README.md", readme, "utf8");
