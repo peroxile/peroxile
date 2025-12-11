@@ -94,7 +94,7 @@ const lines = rows
   .join("\n");
 
 const svg = makeSVG(pickWord());
-fs.writeFileSync("stats.svg", svgText, "utf8");
+fs.writeFileSync("stats.svg", svg, "utf8");
 
 // INJECT INTO README
 
