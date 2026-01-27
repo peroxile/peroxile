@@ -71,8 +71,27 @@ for (const r of repos) {
   }
 }
 
-// COMPUTE
+// COMPUTE HASH 
 
+const statsHash = crypto
+  .createHash("sha256")
+  .update(JSON.stringify(sizeByLang))
+  .digest("hex");
+
+
+// LOAD PREVIOUS RUN DATA
+let lastData = {};
+if (fs.existsSync(".readme-langs.json")) {
+  lastData = JSON.parse(fs.readFileSync(".readme-langs.json", "utf-8"));
+}
+
+// EXIT EARLY IF STATS UNCHANGED 
+if (lastData.hash === statsHash) {
+  console.log("Language stats unchanged. Exiting.");
+  process.exit(0)
+}
+
+// COMPUTE BAR CHART
 const total = Object.values(sizeByLang).reduce((a, b) => a + b, 0);
 if (!total) process.exit(0);
 
@@ -93,8 +112,11 @@ const lines = rows
   })
   .join("\n");
 
-const svg = makeSVG(pickWord());
-fs.writeFileSync("stats.svg", svg, "utf8");
+
+// PICK RANDOM WORD AND GENERATE SVG
+const word = pickWord();
+const svg = makeSVG(word);
+fs.writeFileSync("stats.svg", svg, "utf-8");
 
 // INJECT INTO README
 
@@ -120,3 +142,10 @@ if (!readme.includes("LANG-SECTION:START")) {
 }
 
 fs.writeFileSync("README.md", readme, "utf8");
+
+// SAVE LAST RUN DATA
+fs.writeFileSync(
+  ".readme-langs.json",
+  JSON.stringify({hash: statsHash, word }),
+  "utf-8"
+);
