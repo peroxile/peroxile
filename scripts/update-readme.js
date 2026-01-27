@@ -85,10 +85,13 @@ if (fs.existsSync(".readme-langs.json")) {
   lastData = JSON.parse(fs.readFileSync(".readme-langs.json", "utf-8"));
 }
 
-// EXIT EARLY IF STATS UNCHANGED 
+// SKIP UPDATE IF STATS UNCHANGED, ELSE PICK NEW WORD
+let word;
 if (lastData.hash === statsHash) {
-  console.log("Language stats unchanged. Exiting.");
-  process.exit(0)
+  console.log("Language stats unchanged. Reusing previous word and SVG.");
+  word = lastData.word;
+} else {
+  word = pickWord();
 }
 
 // COMPUTE BAR CHART
@@ -113,12 +116,14 @@ const lines = rows
   .join("\n");
 
 
-// PICK RANDOM WORD AND GENERATE SVG
-const word = pickWord();
-const svg = makeSVG(word);
-fs.writeFileSync("stats.svg", svg, "utf-8");
+// GENERATE SVG ONLY IF STATS CHANGED 
+if (lastData.hash !== statsHash || !fs.existsSync("stats.svg")) {
+  const svg = makeSVG(word);
+  fs.writeFileSync("stats.svg", svg, "utf-8");
+}
 
-// INJECT INTO README
+
+// BUILD README BLOCK
 
 const block = `<!-- LANG-SECTION:START -->
 \`\`\`text
@@ -129,6 +134,8 @@ ${lines}
 
 <img src="./stats.svg">
 <!-- LANG-SECTION:END -->`;
+
+// UPDATE README
 
 let readme = fs.readFileSync("README.md", "utf8");
 
