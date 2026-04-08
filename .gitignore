@@ -1,0 +1,62 @@
+# Injected by SecureGitX
+# OS generated files 
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+wrappers
+*~
+
+# IDE / Editors 
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.project
+.settings/
+*.sublime-*
+# SecureGitX configuration
+.securegitx_config
+
+# Security sensitive files (common)
+*.env
+*.env.*
+.env.local
+*.key
+*.pem
+id_rsa
+id_dsa
+*.ppk
+config.local.*
+
+# Common build directories 
+dist/
+build/
+target/
+node_modules/
+vendor/
+wrapper
+
+# Additional security patterns
+.secrets/
+secrets/
+secrets.*
+*-secrets/
+*-secret/
+private/
+private.*
+credentials/
+credentials.*
+.credentials
+creds/
+*.keystore
+*.p12
+*.pfx
+*.ppk
+*.mnemonic
+*.contract
+.chain/

@@ -1,8 +1,12 @@
 import https from "https";
 import fs from "fs";
 import crypto from "crypto";
+import { rejects } from "assert";
+import { resolve } from "path";
 
 const owner = process.env.GITHUB_REPOSITORY.split("/")[0];
+if (!owner) throw new Error("GITHUB_REPOSITORY is not set");
+
 const BAR = 24;
 
 // RANDOM WORDS
@@ -50,11 +54,39 @@ function api(path) {
         (r) => {
           let d = "";
           r.on("data", (c) => (d += c));
-          r.on("end", () => res(JSON.parse(d)));
+          r.on("end", () => { 
+            if (r.statusCode && r.statusCode >= 400) {
+              return reject(
+                new Error( `Github API ${r.statusCode}: ${d || r.statusMessage}`)
+              );
+            }
+            try {
+              resolve(JSON.parse(d));
+            } catch (err) {
+              reject(new Error(`Invalid JSON from GitHub API: ${String(err)}`));
+            }
+          });
         }
       )
       .on("error", rej);
   });
+}
+
+function loadState() {
+  try {
+    if (!fs.existsSync(STATE_FILE)) return null; 
+    return JSON.parse(fs.readFileSync(STATE_FILE, "utf-8"));
+  } catch {
+    return null;
+  }
+}
+
+function saveState(hash, word) {
+  fs.writeFileSync(
+    STATE_FILE,
+    JSON.stringify({ hash, word }, null, 2) + "\n",
+    "utf-8"
+  );
 }
 
 // FETCH DATA
@@ -64,8 +96,7 @@ const sizeByLang = {};
 
 for (const r of repos) {
   if (r.fork) continue;
-  const langs = await api(`/repos/${owner}/${r.name}/languages`);
-
+  const langs = await api(`/repos/${owner}/${encodeURIComponent(r.name)}/languages`);
   for (const [k, v] of Object.entries(langs)) {
     sizeByLang[k] = (sizeByLang[k] || 0) + v;
   }
@@ -80,18 +111,18 @@ const statsHash = crypto
 
 
 // LOAD PREVIOUS RUN DATA
-let lastData = {};
-if (fs.existsSync(".readme-langs.json")) {
-  lastData = JSON.parse(fs.readFileSync(".readme-langs.json", "utf-8"));
-}
+let lastData = loadState();
+const currentReadme = fs.existsSync("README.md")
+  ? fs.readFileSync("README.md", "utf-8")
+  :"";
 
-// SKIP UPDATE IF STATS UNCHANGED, ELSE PICK NEW WORD
-let word;
-if (lastData.hash === statsHash) {
-  console.log("Language stats unchanged. Reusing previous word and SVG.");
-  word = lastData.word;
-} else {
-  word = pickWord();
+  const hasLangSection = currentReadme.includes("LANG-SECTION:START");
+  const statsSvgExists = fs.existsSync("stats.svg")
+
+// Exit early only when everything already exists and nothing changed.
+if (lastData?.hash === statsHash && hasLangSection && statsSvgExists) {
+  console.log("Language stats unchanged. Nothing to update.");
+  process.exit(0);
 }
 
 // COMPUTE BAR CHART
@@ -122,6 +153,15 @@ if (lastData.hash !== statsHash || !fs.existsSync("stats.svg")) {
   fs.writeFileSync("stats.svg", svg, "utf-8");
 }
 
+// Only pick a new word when stats changed. 
+// If this is a first run, lastData.word will be absent.
+const word = lastData?.hash === statsHash ? lastData.word : pickWord();
+
+// Generate SVG only when needed. 
+const svg = makeSVG(word);
+if (lastData?.hash !== statsHash || !statsSvgExists) {
+  fs.writeFileSync("stats.svg", svg, "utf-8");
+}
 
 // BUILD README BLOCK
 
@@ -137,10 +177,10 @@ ${lines}
 
 // UPDATE README
 
-let readme = fs.readFileSync("README.md", "utf8");
-
-if (!readme.includes("LANG-SECTION:START")) {
-  readme += "\n\n" + block;
+let readme = currentReadme;
+ 
+if (!hasLangSection) {
+  readme += (readme.endsWith("\n") ? "\n" : "\n\n") + block;
 } else {
   readme = readme.replace(
     /<!-- LANG-SECTION:START -->[\s\S]*?<!-- LANG-SECTION:END -->/,
