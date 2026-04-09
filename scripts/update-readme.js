@@ -145,6 +145,8 @@ const lines = rows
   })
   .join("\n");
 
+// PICK WORD ONLY ON CHANGE
+const word = lastData?.hash === statsHash ? lastData.word : pickWord();
 
 // GENERATE SVG ONLY WHEN NEEDED
 if (lastData?.hash !== statsHash || !statsSvgExists) {
@@ -152,11 +154,7 @@ if (lastData?.hash !== statsHash || !statsSvgExists) {
   fs.writeFileSync("stats.svg", svg, "utf8");
 }
 
-// Only pick a new word when stats changed. 
-// If this is a first run, lastData.word will be absent.
-const word = lastData?.hash === statsHash ? lastData.word : pickWord();
-
-// Generate SVG only when needed. 
+// GENERATE SVG ONLY WHEN NEEDED
 const svg = makeSVG(word);
 if (lastData?.hash !== statsHash || !statsSvgExists) {
   fs.writeFileSync("stats.svg", svg, "utf-8");
