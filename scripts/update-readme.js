@@ -4,8 +4,8 @@ import crypto from "crypto";
 
 const owner = process.env.GITHUB_REPOSITORY.split("/")[0];
 if (!owner) throw new Error("GITHUB_REPOSITORY is not set");
-const STATE_FILE = ".readme-langs.json";
 
+const STATE_FILE = ".readme-langs.json";
 const BAR = 24;
 
 // RANDOM WORDS
@@ -146,10 +146,10 @@ const lines = rows
   .join("\n");
 
 
-// GENERATE SVG ONLY IF STATS CHANGED 
-if (lastData.hash !== statsHash || !fs.existsSync("stats.svg")) {
+// GENERATE SVG ONLY WHEN NEEDED
+if (lastData?.hash !== statsHash || !statsSvgExists) {
   const svg = makeSVG(word);
-  fs.writeFileSync("stats.svg", svg, "utf-8");
+  fs.writeFileSync("stats.svg", svg, "utf8");
 }
 
 // Only pick a new word when stats changed. 
@@ -187,11 +187,8 @@ if (!hasLangSection) {
   );
 }
 
+
 fs.writeFileSync("README.md", readme, "utf8");
 
-// SAVE LAST RUN DATA
-fs.writeFileSync(
-  ".readme-langs.json",
-  JSON.stringify({hash: statsHash, word }),
-  "utf-8"
-);
+// SAVE LAST RUN STATE
+saveState(statsHash, word);
