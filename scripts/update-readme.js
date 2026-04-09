@@ -1,11 +1,10 @@
 import https from "https";
 import fs from "fs";
 import crypto from "crypto";
-import { rejects } from "assert";
-import { resolve } from "path";
 
 const owner = process.env.GITHUB_REPOSITORY.split("/")[0];
 if (!owner) throw new Error("GITHUB_REPOSITORY is not set");
+const STATE_FILE = ".readme-langs.json";
 
 const BAR = 24;
 
@@ -56,14 +55,14 @@ function api(path) {
           r.on("data", (c) => (d += c));
           r.on("end", () => { 
             if (r.statusCode && r.statusCode >= 400) {
-              return reject(
+              return rej(
                 new Error( `Github API ${r.statusCode}: ${d || r.statusMessage}`)
               );
             }
             try {
-              resolve(JSON.parse(d));
+              res(JSON.parse(d));
             } catch (err) {
-              reject(new Error(`Invalid JSON from GitHub API: ${String(err)}`));
+              rej(new Error(`Invalid JSON from GitHub API: ${String(err)}`));
             }
           });
         }
