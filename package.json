@@ -1,0 +1,15 @@
+{
+	"name": "readme-langs",
+	"private": true,
+	"type": "module",
+	"scripts": {
+	  "dev": "tsx scripts/update-readme.ts",
+	  "check": "tsc --noEmit"
+	},
+
+	"devDependencies": {
+		"typescript": "^6.0.3",
+		"@types/node": "^25.9.1",
+		"tsx": "^4.0.0"
+	}
+}
