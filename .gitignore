@@ -1,62 +1,38 @@
-# Injected by SecureGitX
-# OS generated files 
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-wrappers
-*~
+# >>> SecureGitX managed — do not edit this block manually
 
-# IDE / Editors 
-.vscode/
-.idea/
-*.swp
-*.swo
-*.swn
-.project
-.settings/
-*.sublime-*
-# SecureGitX configuration
-.securegitx_config
+# SecureGitX local state
+.securegitx/
+.securegitx.toml
 
-# Security sensitive files (common)
+# Security — credentials and keys
 *.env
-*.env.*
+.env.*
 .env.local
-*.key
 *.pem
-id_rsa
-id_dsa
-*.ppk
-config.local.*
-
-# Common build directories 
-dist/
-build/
-target/
-node_modules/
-vendor/
-wrapper
-
-# Additional security patterns
-.secrets/
-secrets/
-secrets.*
-*-secrets/
-*-secret/
-private/
-private.*
-credentials/
-credentials.*
-.credentials
-creds/
-*.keystore
+*.key
 *.p12
 *.pfx
 *.ppk
-*.mnemonic
-*.contract
-.chain/
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+secrets/
+credentials/
+.secrets/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.eslintcache/
+.yarn-integrity
+dist/
+build/
+.next/
+out/
+*.json.key
+
+# <<< SecureGitX
